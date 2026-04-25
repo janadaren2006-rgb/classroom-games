@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>QuizPair</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Nunito', sans-serif; background: #F0F4F8; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 1.25rem 1rem 2rem; }
+  .app { width: 100%; max-width: 500px; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+  .screen { width: 100%; display: none; flex-direction: column; align-items: center; gap: 1rem; }
+  .screen.active { display: flex; }
+
+  .logo { font-size: 36px; font-weight: 900; color: #1a1a2e; letter-spacing: -1px; text-align: center; margin-top: 0.5rem; }
+  .logo span { color: #1D9E75; }
+  .tagline { font-size: 14px; color: #777; font-weight: 600; text-align: center; margin-top: -4px; }
+
+  .name-card { width: 100%; background: white; border-radius: 16px; padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .player-label { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+  .p1-label { color: #185FA5; }
+  .p2-label { color: #B84000; }
+
+  .name-input { width: 100%; padding: 11px 14px; font-size: 19px; font-family: 'Nunito', sans-serif; font-weight: 700; border: 2px solid #E5E9EE; border-radius: 10px; background: #F8FAFB; color: #1a1a2e; outline: none; transition: border-color 0.2s; }
+  .name-input:focus { border-color: #1D9E75; background: white; }
+
+  .btn-primary { width: 100%; padding: 17px; font-size: 20px; font-weight: 900; font-family: 'Nunito', sans-serif; background: #1D9E75; color: white; border: none; border-radius: 16px; cursor: pointer; transition: transform 0.1s, background 0.15s; box-shadow: 0 4px 12px rgba(29,158,117,0.3); }
+  .btn-primary:hover { background: #178a65; }
+  .btn-primary:active { transform: scale(0.97); }
+
+  .handoff-wrap { width: 100%; border-radius: 20px; padding: 2rem 1.5rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .handoff-wrap.p1 { background: #E6F2FF; }
+  .handoff-wrap.p2 { background: #FFF0E6; }
+  .handoff-icon { font-size: 44px; margin-bottom: 4px; }
+  .handoff-eyebrow { font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+  .handoff-wrap.p1 .handoff-eyebrow { color: #185FA5; }
+  .handoff-wrap.p2 .handoff-eyebrow { color: #B84000; }
+  .handoff-name { font-size: 34px; font-weight: 900; line-height: 1.1; }
+  .handoff-wrap.p1 .handoff-name { color: #0C447C; }
+  .handoff-wrap.p2 .handoff-name { color: #7A2900; }
+  .handoff-role { font-size: 15px; font-weight: 700; margin-top: 2px; }
+  .handoff-wrap.p1 .handoff-role { color: #2470B8; }
+  .handoff-wrap.p2 .handoff-role { color: #D05000; }
+
+  .handoff-note { font-size: 14px; color: #666; font-weight: 600; text-align: center; line-height: 1.6; }
+
+  .scores-bar { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .score-card { background: white; border-radius: 14px; padding: 12px 10px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+  .score-name { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; }
+  .score-name.p1 { color: #185FA5; }
+  .score-name.p2 { color: #B84000; }
+  .score-val { font-size: 32px; font-weight: 900; color: #1a1a2e; line-height: 1.1; }
+  .score-sub { font-size: 11px; color: #aaa; font-weight: 700; letter-spacing: 0.5px; }
+
+  .meta-row { width: 100%; display: flex; align-items: center; justify-content: space-between; }
+  .cat-badge { font-size: 11px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; padding: 5px 12px; border-radius: 20px; }
+  .cat-ela     { background: #EEEDFE; color: #3C3489; }
+  .cat-math    { background: #EAF3DE; color: #27500A; }
+  .cat-science { background: #E1F5EE; color: #085041; }
+  .cat-social  { background: #FAEEDA; color: #633806; }
+  .q-counter { font-size: 13px; font-weight: 700; color: #aaa; }
+
+  .qa-card { width: 100%; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.07); }
+  .question-section { padding: 1.5rem 1.5rem 1.25rem; border-bottom: 2px dashed #EEF0F3; }
+  .section-label { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #BBC; margin-bottom: 8px; }
+  .question-text { font-size: 21px; font-weight: 800; color: #1a1a2e; line-height: 1.4; }
+  .answer-section { padding: 1.1rem 1.5rem 1.25rem; background: #F5FBF8; }
+  .answer-section-label { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #1D9E75; margin-bottom: 6px; }
+  .answer-text { font-size: 16px; font-weight: 700; color: #2a4a3e; line-height: 1.55; }
+
+  .answerer-chip { width: 100%; padding: 11px 16px; border-radius: 12px; font-size: 14px; font-weight: 700; text-align: center; }
+  .answerer-chip.p1 { background: #FFF0E6; color: #7A2900; }
+  .answerer-chip.p2 { background: #E6F2FF; color: #0C447C; }
+
+  .grader-label { font-size: 13px; font-weight: 800; color: #999; text-align: center; text-transform: uppercase; letter-spacing: 0.6px; }
+
+  .grade-btns { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+  .grade-btn { width: 100%; padding: 18px; font-size: 19px; font-weight: 800; font-family: 'Nunito', sans-serif; border: none; border-radius: 16px; cursor: pointer; transition: transform 0.1s, filter 0.1s; box-shadow: 0 3px 8px rgba(0,0,0,0.1); }
+  .grade-btn:active { transform: scale(0.97); filter: brightness(0.95); }
+  .btn-excellent   { background: #3DBE8F; color: #04342C; }
+  .btn-pretty-good { background: #F5B942; color: #412402; }
+  .btn-keep-trying { background: #EE7A55; color: #4A1B0C; }
+
+  .btn-next { width: 100%; padding: 15px; font-size: 17px; font-weight: 800; font-family: 'Nunito', sans-serif; background: white; color: #1a1a2e; border: 2px solid #E0E5EC; border-radius: 14px; cursor: pointer; transition: background 0.15s; }
+  .btn-next:hover { background: #F0F4F8; }
+
+  .btn-end-game { background: none; border: none; font-size: 13px; font-weight: 700; color: #CCC; cursor: pointer; font-family: 'Nunito', sans-serif; padding: 6px 12px; border-radius: 8px; transition: color 0.2s; align-self: center; margin-bottom: 0.5rem; }
+  .btn-end-game:hover { color: #E24B4A; }
+
+  .winner-banner { width: 100%; background: white; border-radius: 20px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .trophy { font-size: 56px; }
+  .winner-eyebrow { font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #BBC; }
+  .winner-name { font-size: 36px; font-weight: 900; color: #1a1a2e; }
+  .winner-sub { font-size: 15px; font-weight: 700; color: #999; }
+
+  .final-scores { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .final-score-card { background: white; border-radius: 16px; padding: 1.25rem 1rem; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.06); display: flex; flex-direction: column; gap: 4px; border: 2px solid transparent; }
+  .final-score-card.winner-card { border-color: #1D9E75; box-shadow: 0 4px 16px rgba(29,158,117,0.2); }
+  .final-player-name { font-size: 16px; font-weight: 800; color: #1a1a2e; }
+  .final-score-val { font-size: 44px; font-weight: 900; color: #1a1a2e; line-height: 1; }
+  .final-score-label { font-size: 12px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; }
+  .final-qs { font-size: 13px; color: #BBC; font-weight: 600; }
+
+  .btn-play-again { width: 100%; padding: 17px; font-size: 20px; font-weight: 900; font-family: 'Nunito', sans-serif; background: #1D9E75; color: white; border: none; border-radius: 16px; cursor: pointer; transition: transform 0.1s, background 0.15s; box-shadow: 0 4px 12px rgba(29,158,117,0.3); margin-top: 0.5rem; }
+  .btn-play-again:hover { background: #178a65; }
+  .btn-play-again:active { transform: scale(0.97); }
+  .btn-new-players { background: none; border: none; font-size: 14px; font-weight: 700; color: #BBC; cursor: pointer; font-family: 'Nunito', sans-serif; padding: 6px; margin-bottom: 1rem; }
+  .btn-new-players:hover { color: #185FA5; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="screen active" id="screen-setup">
+    <div class="logo">Quiz<span>Pair</span></div>
+    <div class="tagline">Two players. One iPad. Unlimited questions.</div>
+    <div class="name-card">
+      <div class="player-label p1-label">Player 1</div>
+      <input class="name-input" id="name1" type="text" placeholder="First name..." maxlength="16" autocomplete="off" />
+    </div>
+    <div class="name-card">
+      <div class="player-label p2-label">Player 2</div>
+      <input class="name-input" id="name2" type="text" placeholder="First name..." maxlength="16" autocomplete="off" />
+    </div>
+    <button class="btn-primary" id="btn-start">Let's Play!</button>
+  </div>
+
+  <div class="screen" id="screen-handoff">
+    <div class="handoff-wrap p1" id="handoff-banner">
+      <div class="handoff-icon">📱</div>
+      <div class="handoff-eyebrow">iPad goes to</div>
+      <div class="handoff-name" id="handoff-name">Player 1</div>
+      <div class="handoff-role">You ask the question</div>
+    </div>
+    <div class="handoff-note" id="handoff-note"></div>
+    <button class="btn-primary" id="btn-ready">Ready!</button>
+  </div>
+
+  <div class="screen" id="screen-quiz">
+    <div class="scores-bar">
+      <div class="score-card">
+        <div class="score-name p1" id="score-name1">P1</div>
+        <div class="score-val" id="score-val1">0</div>
+        <div class="score-sub">PTS</div>
+      </div>
+      <div class="score-card">
+        <div class="score-name p2" id="score-name2">P2</div>
+        <div class="score-val" id="score-val2">0</div>
+        <div class="score-sub">PTS</div>
+      </div>
+    </div>
+
+    <div class="meta-row">
+      <span class="cat-badge cat-ela" id="cat-badge">ELA</span>
+      <span class="q-counter" id="q-counter">Q1</span>
+    </div>
+
+    <div class="qa-card">
+      <div class="question-section">
+        <div class="section-label">Read this question aloud</div>
+        <div class="question-text" id="question-text">Loading...</div>
+      </div>
+      <div class="answer-section">
+        <div class="answer-section-label">✓ Expected Answer</div>
+        <div class="answer-text" id="answer-text"></div>
+      </div>
+    </div>
+
+    <div class="answerer-chip p2" id="answerer-chip">Player 2 answers out loud</div>
+    <div class="grader-label" id="grader-label">Grade their answer:</div>
+
+    <div class="grade-btns" id="grade-btns">
+      <button class="grade-btn btn-excellent"   onclick="grade(3)">⭐ Excellent!</button>
+      <button class="grade-btn btn-pretty-good" onclick="grade(2)">👍 Pretty Good</button>
+      <button class="grade-btn btn-keep-trying" onclick="grade(0)">💪 Keep Trying</button>
+    </div>
+
+    <button class="btn-next" id="btn-next" style="display:none;" onclick="nextTurn()">Next Question →</button>
+    <button class="btn-end-game" onclick="endGame()">End Game</button>
+  </div>
+
+  <div class="screen" id="screen-end">
+    <div class="winner-banner" id="winner-banner">
+      <div class="trophy" id="trophy">🏆</div>
+      <div class="winner-eyebrow">Winner</div>
+      <div class="winner-name" id="winner-name">—</div>
+      <div class="winner-sub" id="winner-sub"></div>
+    </div>
+    <div class="final-scores">
+      <div class="final-score-card" id="final-card-1">
+        <div class="final-player-name" id="final-name1">P1</div>
+        <div class="final-score-val" id="final-val1">0</div>
+        <div class="final-score-label">points</div>
+      </div>
+      <div class="final-score-card" id="final-card-2">
+        <div class="final-player-name" id="final-name2">P2</div>
+        <div class="final-score-val" id="final-val2">0</div>
+        <div class="final-score-label">points</div>
+      </div>
+    </div>
+    <div class="final-qs" id="final-qs">— questions answered</div>
+    <button class="btn-play-again" onclick="playAgain()">Play Again</button>
+    <button class="btn-new-players" onclick="newPlayers()">Change Players</button>
+  </div>
+
+</div>
+<script>
+const questions = [
+  { q: "What are three elements of poetry?", a: "Rhythm, rhyme, and imagery. Also accepted: stanzas, repetition, alliteration, verse.", cat: "ela" },
+  { q: "What is the main idea of a story?", a: "The most important point or message the author wants you to understand.", cat: "ela" },
+  { q: "Name two things a character can teach us in a story.", a: "A lesson or moral; how to solve problems; how to treat others; how to handle feelings.", cat: "ela" },
+  { q: "What is the difference between fiction and non-fiction?", a: "Fiction is made up. Non-fiction is about real people, places, or events.", cat: "ela" },
+  { q: "What does a verb do in a sentence?", a: "It shows an action or a state of being. Examples: run, jump, is, feel.", cat: "ela" },
+  { q: "What is a compound word? Give an example.", a: "Two words joined to make a new word. Examples: sunshine, raincoat, butterfly.", cat: "ela" },
+  { q: "What are the two main parts of a sentence?", a: "The subject (who or what) and the predicate (what they do or are).", cat: "ela" },
+  { q: "What is a synonym? Give an example.", a: "A word that means the same or nearly the same. Example: happy and joyful.", cat: "ela" },
+  { q: "What does a noun name?", a: "A person, place, thing, or idea.", cat: "ela" },
+  { q: "How many sides does a quadrilateral have?", a: "Four sides.", cat: "math" },
+  { q: "What is the difference between odd and even numbers?", a: "Even numbers can be split into two equal groups (2, 4, 6…). Odd numbers cannot (1, 3, 5…).", cat: "math" },
+  { q: "What does the equals sign mean?", a: "Both sides of the equation have the same value.", cat: "math" },
+  { q: "What is a number line used for?", a: "To show numbers in order and help with counting, adding, or subtracting.", cat: "math" },
+  { q: "If you have 15 apples and give away 7, how many are left?", a: "8 apples.", cat: "math" },
+  { q: "What does it mean to estimate?", a: "To make a careful guess that is close to the real answer.", cat: "math" },
+  { q: "What is the value of the digit 3 in the number 35?", a: "30, or three tens.", cat: "math" },
+  { q: "What is skip counting? Give an example.", a: "Counting by a number other than 1. Example: 5, 10, 15, 20.", cat: "math" },
+  { q: "What do plants need to grow?", a: "Sunlight, water, air (carbon dioxide), and soil or nutrients.", cat: "science" },
+  { q: "Name the three states of matter.", a: "Solid, liquid, and gas.", cat: "science" },
+  { q: "What is an animal that only eats plants called?", a: "A herbivore.", cat: "science" },
+  { q: "Why do we have seasons?", a: "Because Earth tilts on its axis as it travels around the Sun.", cat: "science" },
+  { q: "What is the water cycle?", a: "Water evaporates, forms clouds, falls as rain or snow, collects — then repeats.", cat: "science" },
+  { q: "Name two natural resources.", a: "Any two of: water, air, wood, coal, sunlight, soil, oil.", cat: "science" },
+  { q: "What is an insect? Name one feature.", a: "An animal with 6 legs and 3 body parts: head, thorax, abdomen. Many have wings or antennae.", cat: "science" },
+  { q: "What does a map legend (key) tell you?", a: "It explains what the symbols and colors on a map mean.", cat: "social" },
+  { q: "What is the difference between a city and a country?", a: "A city is a large community inside a country. A country is a land with its own government.", cat: "social" },
+  { q: "Why do communities have rules and laws?", a: "To keep people safe, treat everyone fairly, and help things run smoothly.", cat: "social" },
+  { q: "Name two things that make communities different from each other.", a: "Any two of: language, food, traditions, geography, climate, size, buildings.", cat: "social" },
+  { q: "What is a good citizen?", a: "Someone who follows rules, helps others, respects differences, and cares for their community.", cat: "social" },
+  { q: "What are the four cardinal directions?", a: "North, South, East, and West.", cat: "social" },
+];
+
+const catLabels  = { ela: "ELA", math: "Math", science: "Science", social: "Social Studies" };
+const catClasses = { ela: "cat-ela", math: "cat-math", science: "cat-science", social: "cat-social" };
+
+let p1 = "Player 1", p2 = "Player 2";
+let scores = [0, 0];
+let currentAnswerer = 0;
+let questionCount = 0;
+let usedIndexes = [];
+let currentQ = null;
+let graded = false;
+
+function getQuestion() {
+  if (usedIndexes.length === questions.length) usedIndexes = [];
+  let idx;
+  do { idx = Math.floor(Math.random() * questions.length); } while (usedIndexes.includes(idx));
+  usedIndexes.push(idx);
+  return questions[idx];
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+document.getElementById('btn-start').addEventListener('click', () => {
+  const n1 = document.getElementById('name1').value.trim();
+  const n2 = document.getElementById('name2').value.trim();
+  if (!n1 || !n2) { alert('Please enter both names!'); return; }
+  p1 = n1; p2 = n2;
+  document.getElementById('score-name1').textContent = p1;
+  document.getElementById('score-name2').textContent = p2;
+  currentAnswerer = 0; questionCount = 0; scores = [0, 0]; usedIndexes = [];
+  updateScores();
+  showHandoff();
+});
+
+function showHandoff() {
+  // currentAnswerer = who is ANSWERING (no iPad)
+  // iPad holder = the OTHER player = the questioner
+  const iPadHolder = currentAnswerer === 0 ? p2 : p1;
+  const answerer   = currentAnswerer === 0 ? p1 : p2;
+  const holderIsP1 = currentAnswerer !== 0;
+
+  const banner = document.getElementById('handoff-banner');
+  banner.className = 'handoff-wrap ' + (holderIsP1 ? 'p1' : 'p2');
+  document.getElementById('handoff-name').textContent = iPadHolder;
+  document.getElementById('handoff-note').textContent =
+    iPadHolder + ' holds the iPad and reads the question aloud. ' + answerer + ' puts the iPad face-down and answers from memory.';
+  showScreen('screen-handoff');
+}
+
+document.getElementById('btn-ready').addEventListener('click', () => {
+  loadQuestion();
+  showScreen('screen-quiz');
+});
+
+function loadQuestion() {
+  currentQ = getQuestion();
+  questionCount++;
+  graded = false;
+
+  const answererName = currentAnswerer === 0 ? p1 : p2;
+  const isAnswererP1 = currentAnswerer === 0;
+
+  document.getElementById('question-text').textContent = currentQ.q;
+  document.getElementById('answer-text').textContent = currentQ.a;
+  document.getElementById('q-counter').textContent = 'Q' + questionCount;
+
+  const badge = document.getElementById('cat-badge');
+  badge.textContent = catLabels[currentQ.cat];
+  badge.className = 'cat-badge ' + catClasses[currentQ.cat];
+
+  const chip = document.getElementById('answerer-chip');
+  chip.textContent = answererName + ' answers out loud';
+  chip.className = 'answerer-chip ' + (isAnswererP1 ? 'p1' : 'p2');
+
+  document.getElementById('grader-label').textContent = 'Grade their answer:';
+  document.getElementById('btn-next').style.display = 'none';
+  document.getElementById('grade-btns').style.display = 'flex';
+}
+
+function grade(pts) {
+  if (graded) return;
+  graded = true;
+  scores[currentAnswerer] += pts;
+  updateScores();
+  document.getElementById('grade-btns').style.display = 'none';
+  document.getElementById('btn-next').style.display = 'block';
+  const labels = { 3: '⭐ Marked: Excellent!', 2: '👍 Marked: Pretty Good', 0: '💪 Marked: Keep Trying' };
+  document.getElementById('grader-label').textContent = labels[pts];
+}
+
+function updateScores() {
+  document.getElementById('score-val1').textContent = scores[0];
+  document.getElementById('score-val2').textContent = scores[1];
+}
+
+function nextTurn() {
+  currentAnswerer = currentAnswerer === 0 ? 1 : 0;
+  showHandoff();
+}
+
+function endGame() {
+  document.getElementById('final-name1').textContent = p1;
+  document.getElementById('final-name2').textContent = p2;
+  document.getElementById('final-val1').textContent = scores[0];
+  document.getElementById('final-val2').textContent = scores[1];
+  document.getElementById('final-qs').textContent = questionCount + ' question' + (questionCount !== 1 ? 's' : '') + ' answered';
+
+  document.getElementById('final-card-1').className = 'final-score-card';
+  document.getElementById('final-card-2').className = 'final-score-card';
+
+  const trophy = document.getElementById('trophy');
+  const winnerName = document.getElementById('winner-name');
+  const winnerSub = document.getElementById('winner-sub');
+  const winnerBanner = document.getElementById('winner-banner');
+
+  winnerBanner.style.background = 'white';
+  winnerName.style.color = '#1a1a2e';
+
+  if (scores[0] === scores[1]) {
+    trophy.textContent = '🤝';
+    document.querySelector('.winner-eyebrow').textContent = "It's a Tie!";
+    winnerName.textContent = scores[0] + ' points each';
+    winnerSub.textContent = 'Well played, both of you!';
+  } else if (scores[0] > scores[1]) {
+    trophy.textContent = '🏆';
+    document.querySelector('.winner-eyebrow').textContent = 'Winner';
+    winnerName.textContent = p1;
+    winnerSub.textContent = scores[0] + ' pts vs ' + scores[1] + ' pts';
+    document.getElementById('final-card-1').className = 'final-score-card winner-card';
+  } else {
+    trophy.textContent = '🏆';
+    document.querySelector('.winner-eyebrow').textContent = 'Winner';
+    winnerName.textContent = p2;
+    winnerSub.textContent = scores[1] + ' pts vs ' + scores[0] + ' pts';
+    document.getElementById('final-card-2').className = 'final-score-card winner-card';
+  }
+  showScreen('screen-end');
+}
+
+function playAgain() {
+  scores = [0, 0]; currentAnswerer = 0; questionCount = 0; usedIndexes = [];
+  updateScores();
+  showHandoff();
+}
+
+function newPlayers() {
+  scores = [0, 0]; currentAnswerer = 0; questionCount = 0; usedIndexes = [];
+  document.getElementById('name1').value = '';
+  document.getElementById('name2').value = '';
+  showScreen('screen-setup');
+}
+</script>
+</body>
+</html>

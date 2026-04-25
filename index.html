@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chingshin Games</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #F0F4F8;
+    min-height: 100vh;
+    color: #1a1a2e;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: white;
+    border-bottom: 1px solid #E5E9EE;
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .logo { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; }
+  .logo span { color: #1D9E75; }
+  .logo-sub { font-size: 12px; font-weight: 700; color: #AAB; letter-spacing: 0.5px; text-transform: uppercase; }
+  .header-right { font-size: 13px; color: #BBC; font-weight: 600; text-align: right; }
+
+  /* ── MAIN ── */
+  .main { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  /* ── CATEGORY TABS ── */
+  .cat-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 2rem; }
+  .cat-tab {
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.15s;
+    background: white;
+    color: #888;
+    border-color: #E5E9EE;
+  }
+  .cat-tab:hover { border-color: #BBC; color: #555; }
+  .cat-tab.active { color: white; border-color: transparent; }
+  .cat-tab[data-cat="all"].active    { background: #1a1a2e; }
+  .cat-tab[data-cat="ela"].active    { background: #534AB7; }
+  .cat-tab[data-cat="math"].active   { background: #3B6D11; }
+  .cat-tab[data-cat="science"].active { background: #0F6E56; }
+  .cat-tab[data-cat="social"].active  { background: #854F0B; }
+  .cat-tab[data-cat="mixed"].active   { background: #A32D2D; }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+    margin-top: 0.5rem;
+  }
+  .section-title { font-size: 18px; font-weight: 900; color: #1a1a2e; }
+  .section-count { font-size: 13px; font-weight: 700; color: #BBC; background: #F0F4F8; padding: 3px 10px; border-radius: 20px; }
+
+  /* ── GRID ── */
+  .activities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  /* ── ACTIVITY CARD ── */
+  .activity-card {
+    background: white;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .activity-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+  .activity-card.placeholder { opacity: 0.45; }
+
+  .card-top { padding: 1.25rem 1.25rem 1rem; flex: 1; }
+  .card-cat-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .card-badge { font-size: 11px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; }
+  .badge-ela     { background: #EEEDFE; color: #3C3489; }
+  .badge-math    { background: #EAF3DE; color: #27500A; }
+  .badge-science { background: #E1F5EE; color: #085041; }
+  .badge-social  { background: #FAEEDA; color: #633806; }
+  .badge-mixed   { background: #FCEBEB; color: #A32D2D; }
+
+  .card-status { font-size: 11px; font-weight: 700; color: #BBC; }
+  .card-status.ready { color: #1D9E75; }
+
+  .card-title { font-size: 19px; font-weight: 900; color: #1a1a2e; margin-bottom: 6px; line-height: 1.2; }
+  .card-desc { font-size: 13px; color: #777; font-weight: 600; line-height: 1.55; }
+
+  .card-actions {
+    padding: 0.9rem 1.25rem;
+    border-top: 1px solid #F0F4F8;
+    display: flex;
+    gap: 8px;
+  }
+  .btn-play {
+    flex: 1;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: 800;
+    font-family: 'Nunito', sans-serif;
+    background: #1D9E75;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn-play:hover { background: #178a65; }
+  .btn-play:active { transform: scale(0.97); }
+  .btn-play:disabled { background: #C8D5CC; cursor: not-allowed; }
+
+  .btn-qr {
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 800;
+    font-family: 'Nunito', sans-serif;
+    background: #F0F4F8;
+    color: #555;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .btn-qr:hover { background: #E5E9EE; }
+  .btn-qr:active { transform: scale(0.97); }
+  .btn-qr:disabled { color: #CCC; cursor: not-allowed; }
+
+  /* ── QR OVERLAY ── */
+  .qr-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 20, 0.82);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+  .qr-overlay.visible { display: flex; }
+
+  .qr-modal {
+    background: white;
+    border-radius: 24px;
+    padding: 2.5rem 2rem 2rem;
+    max-width: 400px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    position: relative;
+  }
+  .qr-close {
+    position: absolute;
+    top: 16px; right: 18px;
+    background: #F0F4F8;
+    border: none;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #888;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+  }
+  .qr-close:hover { background: #E5E9EE; color: #333; }
+
+  .qr-title { font-size: 20px; font-weight: 900; color: #1a1a2e; text-align: center; }
+  .qr-subtitle { font-size: 13px; color: #999; font-weight: 600; text-align: center; margin-top: -6px; }
+  #qr-code-container { padding: 16px; background: white; border-radius: 12px; border: 2px solid #F0F4F8; }
+  .qr-instruction { font-size: 14px; font-weight: 700; color: #555; text-align: center; line-height: 1.5; }
+  .qr-url { font-size: 11px; color: #BBC; font-weight: 600; text-align: center; word-break: break-all; padding: 0 1rem; }
+
+  /* ── HIDDEN ── */
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="logo">Chingshin <span>Games</span></div>
+    <div class="logo-sub">Grade 2 · Teacher Hub</div>
+  </div>
+  <div class="header-right">Display on smartboard<br>Students scan QR to play</div>
+</div>
+
+<div class="main">
+
+  <div class="cat-tabs" id="cat-tabs">
+    <button class="cat-tab active" data-cat="all">All Activities</button>
+    <button class="cat-tab" data-cat="ela">📖 ELA</button>
+    <button class="cat-tab" data-cat="math">🔢 Math</button>
+    <button class="cat-tab" data-cat="science">🔬 Science</button>
+    <button class="cat-tab" data-cat="social">🌍 Social Studies</button>
+    <button class="cat-tab" data-cat="mixed">🎮 Mixed Review</button>
+  </div>
+
+  <div id="activities-container"></div>
+
+</div>
+
+<!-- QR OVERLAY -->
+<div class="qr-overlay" id="qr-overlay">
+  <div class="qr-modal">
+    <button class="qr-close" onclick="closeQR()">✕</button>
+    <div class="qr-title" id="qr-modal-title">Activity Name</div>
+    <div class="qr-subtitle">Scan with iPad camera to play</div>
+    <div id="qr-code-container"></div>
+    <div class="qr-instruction">Point your iPad camera at the code — tap the link that appears</div>
+    <div class="qr-url" id="qr-url-display"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  ACTIVITY LIST — add new activities here only
+// ══════════════════════════════════════════════
+const activities = [
+  {
+    title: "QuizPair",
+    category: "mixed",
+    description: "Two students, one iPad. One asks, one answers out loud. Peer grading with live scores.",
+    file: "quizpair.html",
+    ready: true
+  },
+  {
+    title: "Vocabulary Match",
+    category: "ela",
+    description: "Match unit vocabulary words to their definitions. Drag and drop.",
+    file: "vocabmatch.html",
+    ready: false
+  },
+  {
+    title: "Story Elements Quiz",
+    category: "ela",
+    description: "Identify characters, setting, problem, and solution in short passages.",
+    file: "storyelements.html",
+    ready: false
+  },
+  {
+    title: "Addition & Subtraction",
+    category: "math",
+    description: "Timed practice with two-digit addition and subtraction. Adjustable difficulty.",
+    file: "addsubtract.html",
+    ready: false
+  },
+  {
+    title: "Place Value Builder",
+    category: "math",
+    description: "Build numbers using hundreds, tens, and ones blocks. Visual and interactive.",
+    file: "placevalue.html",
+    ready: false
+  },
+  {
+    title: "States of Matter Sort",
+    category: "science",
+    description: "Drag objects into solid, liquid, or gas categories. Instant feedback.",
+    file: "matterstates.html",
+    ready: false
+  },
+  {
+    title: "Water Cycle",
+    category: "science",
+    description: "Label the stages of the water cycle. Tap to place: evaporation, condensation, precipitation.",
+    file: "watercycle.html",
+    ready: false
+  },
+  {
+    title: "Map Skills",
+    category: "social",
+    description: "Read a simple map, identify cardinal directions, and use the legend.",
+    file: "mapskills.html",
+    ready: false
+  },
+];
+
+// ══════════════════════════════════════════════
+//  BASE URL — update this after GitHub Pages setup
+// ══════════════════════════════════════════════
+const BASE_URL = window.location.href.replace('index.html', '').replace(/\/$/, '');
+
+// ── CATEGORY CONFIG ──
+const catConfig = {
+  ela:     { label: "ELA",           icon: "📖" },
+  math:    { label: "Math",          icon: "🔢" },
+  science: { label: "Science",       icon: "🔬" },
+  social:  { label: "Social Studies",icon: "🌍" },
+  mixed:   { label: "Mixed Review",  icon: "🎮" },
+};
+
+const badgeClass = { ela: "badge-ela", math: "badge-math", science: "badge-science", social: "badge-social", mixed: "badge-mixed" };
+
+let currentCat = "all";
+let qrInstance = null;
+
+// ── RENDER ──
+function render() {
+  const container = document.getElementById('activities-container');
+  container.innerHTML = '';
+
+  const cats = currentCat === 'all'
+    ? Object.keys(catConfig)
+    : [currentCat];
+
+  cats.forEach(cat => {
+    const items = activities.filter(a => a.category === cat);
+    if (items.length === 0) return;
+
+    const section = document.createElement('div');
+
+    const cfg = catConfig[cat];
+    section.innerHTML = `
+      <div class="section-header">
+        <div class="section-title">${cfg.icon} ${cfg.label}</div>
+        <div class="section-count">${items.length} ${items.length === 1 ? 'activity' : 'activities'}</div>
+      </div>
+      <div class="activities-grid" id="grid-${cat}"></div>
+    `;
+    container.appendChild(section);
+
+    const grid = section.querySelector(`#grid-${cat}`);
+    items.forEach(activity => {
+      const card = document.createElement('div');
+      card.className = 'activity-card' + (activity.ready ? '' : ' placeholder');
+      card.innerHTML = `
+        <div class="card-top">
+          <div class="card-cat-row">
+            <span class="card-badge ${badgeClass[activity.category]}">${catConfig[activity.category].label}</span>
+            <span class="card-status ${activity.ready ? 'ready' : ''}">${activity.ready ? '✓ Ready' : 'Coming soon'}</span>
+          </div>
+          <div class="card-title">${activity.title}</div>
+          <div class="card-desc">${activity.description}</div>
+        </div>
+        <div class="card-actions">
+          <button class="btn-play" onclick="playActivity('${activity.file}')" ${activity.ready ? '' : 'disabled'}>▶ Play</button>
+          <button class="btn-qr"   onclick="showQR('${activity.title}', '${activity.file}')" ${activity.ready ? '' : 'disabled'}>📱 QR</button>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  });
+}
+
+// ── TABS ──
+document.getElementById('cat-tabs').addEventListener('click', e => {
+  const tab = e.target.closest('.cat-tab');
+  if (!tab) return;
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  currentCat = tab.dataset.cat;
+  render();
+});
+
+// ── PLAY ──
+function playActivity(file) {
+  window.open(file, '_blank');
+}
+
+// ── QR ──
+function showQR(title, file) {
+  const url = BASE_URL + '/' + file;
+  document.getElementById('qr-modal-title').textContent = title;
+  document.getElementById('qr-url-display').textContent = url;
+
+  const container = document.getElementById('qr-code-container');
+  container.innerHTML = '';
+
+  if (qrInstance) { qrInstance = null; }
+
+  qrInstance = new QRCode(container, {
+    text: url,
+    width: 220,
+    height: 220,
+    colorDark: '#1a1a2e',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+
+  document.getElementById('qr-overlay').classList.add('visible');
+}
+
+function closeQR() {
+  document.getElementById('qr-overlay').classList.remove('visible');
+}
+
+document.getElementById('qr-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('qr-overlay')) closeQR();
+});
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeQR(); });
+
+// ── INIT ──
+render();
+</script>
+</body>
+</html>
