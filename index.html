@@ -262,11 +262,11 @@ const activities = [
     ready: false
   },
   {
-    title: "Addition & Subtraction",
-    category: "math",
-    description: "Timed practice with two-digit addition and subtraction. Adjustable difficulty.",
-    file: "addsubtract.html",
-    ready: false
+    title: "Countdown to Summer",
+  category: "fun",
+  description: "How many days until summer vacation?",
+  file: "countdown.html",
+  ready: true
   },
   {
     title: "Place Value Builder",
@@ -310,9 +310,10 @@ const catConfig = {
   science: { label: "Science",       icon: "🔬" },
   social:  { label: "Social Studies",icon: "🌍" },
   mixed:   { label: "Mixed Review",  icon: "🎮" },
+ fun: { label: "Just for Fun", icon: "🎉" },
 };
 
-const badgeClass = { ela: "badge-ela", math: "badge-math", science: "badge-science", social: "badge-social", mixed: "badge-mixed" };
+const badgeClass = { ela: "badge-ela", math: "badge-math", science: "badge-science", social: "badge-social", mixed: "badge-mixed", fun: "badge-mixed", };
 
 let currentCat = "all";
 let qrInstance = null;
